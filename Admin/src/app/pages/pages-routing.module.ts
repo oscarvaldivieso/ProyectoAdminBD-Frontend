@@ -68,6 +68,9 @@ const routes: Routes = [
   {
     path: 'pages', loadChildren: () => import('./extrapages/extrapages.module').then(m => m.ExtrapagesModule)
   },
+  {
+    path: 'databases', loadChildren: () => import('./databases/databases.module').then(m => m.DatabasesModule)
+  }
 ];
 
 @NgModule({

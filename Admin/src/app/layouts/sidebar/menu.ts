@@ -50,18 +50,10 @@ export const MENU: MenuItem[] = [
     },
     {
         id: 12,
-        label: 'MENUITEMS.APPS.LIST.RESTAURANTE',
+        label: 'MENUITEMS.APPS.LIST.BASES',
         icon: 'ph-storefront',
-        parentId: 8,
-        subItems: [
-            {
-                id: 13,
-                label: 'MENUITEMS.APPS.LIST.RESTAURANTES',
-                link: '/restaurante/restaurantes/list',
-                parentId: 12
-            }
-            
-        ]
+        link: '/databases/list'
+        
     },
     {
         id: 24,
