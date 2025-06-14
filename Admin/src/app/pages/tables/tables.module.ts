@@ -10,6 +10,8 @@ import { TablesRoutingModule } from './tables-routing.module';
 import { ModalsComponent } from '../ui/modals/modals.component';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { ListComponent} from './list/list.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -21,7 +23,9 @@ import { ListComponent} from './list/list.component';
     SharedModule,
     CdkStepperModule,
     NgStepperModule,
-    ModalModule.forRoot()
+    ModalModule.forRoot(),
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class TablesModule { }
