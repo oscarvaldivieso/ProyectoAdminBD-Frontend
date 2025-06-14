@@ -7,6 +7,12 @@ export const MENU: MenuItem[] = [
         label: 'MENUITEMS.APPS.LIST.BASES',
         icon: ' ph-database',
         link: '/databases/list'
+    },
+    {
+        id: 12,
+        label: 'MENUITEMS.APPS.LIST.TABLES',
+        icon: ' ph-table',
+        link: '/tables/list'
         
     }
     

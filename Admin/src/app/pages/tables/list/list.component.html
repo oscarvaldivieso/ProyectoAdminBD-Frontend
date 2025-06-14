@@ -1,0 +1,95 @@
+<div class="row">
+    
+    <div class="col-lg">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center gy-3">
+                    <div class="col-3">
+                        <h6 class="card-title mb-0">Tablas</h6>
+                    </div><!--end col-->
+                    <div class="col-auto ms-auto">
+                        <button type="button" class="btn btn-secondary me-1" >
+                          <i class="ri ri-restaurant align-baseline me-1"></i> Agregar una tabla
+                        </button>
+                    </div><!--end col-->
+                </div><!--end row-->
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="selectBD" class="form-label">Selecciona una base de datos</label>
+            <select id="selectBD" class="form-select" (change)="listarTablasDeBD($any($event.target).value)">
+                <option value="" disabled selected>-- Selecciona una base de datos --</option>
+                <option *ngFor="let db of BasesDatos" [value]="db">{{ db }}</option>
+            </select>
+        </div>
+
+
+        
+
+        <div class="row mt-4" *ngIf="TablasBD.length > 0">
+          <div class="col-12 mb-3">
+            <h5 class="fw-bold">Tablas en la base de datos seleccionada</h5>
+          </div>
+          <div class="col-md-4 mb-4" *ngFor="let tabla of TablasBD; let i = index">
+            <div class="card shadow border-0 h-100 animate__animated animate__fadeInUp" [style.animationDelay]="(i * 0.08)+'s'">
+              <div class="card-body d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-3">
+                    <i class="ph ph-table fs-2 text-white"></i>
+                  </div>
+                  <div>
+                    <span class="fw-semibold fs-5">{{ tabla }}</span>
+                    <div class="text-muted small">Tabla de datos</div>
+                  </div>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" title="Ver más">
+                  Ver más
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="TablasBD.length === 0 && BasesDatos.length > 0" class="text-center text-muted mt-5">
+          <div class="avatar-md mx-auto mb-3">
+            <div class="avatar-title bg-light text-primary rounded-circle fs-2xl">
+              <i class="ph ph-table"></i>
+            </div>
+          </div>
+          <h5 class="mb-2">No hay tablas en esta base de datos</h5>
+          <p>¡Agrega una nueva tabla para comenzar a gestionar tus datos!</p>
+        </div>
+    </div>
+</div>
+
+<style>
+  .db-title-truncate {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: middle;
+  }
+</style>
+
+<!-- <ng-template #templateAgregarBD>
+  <div class="modal-header">
+    <h5 class="modal-title">Agregar Base de Datos</h5>
+    <button type="button" class="btn-close" (click)="modalRef?.hide()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="nombreBD" class="form-label">Nombre de la base de datos</label>
+      <input type="text" class="form-control" id="nombreBD" [(ngModel)]="nuevoNombreBD" placeholder="Ingrese el nombre">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Cancelar</button>
+    <button type="button" class="btn btn-primary" (click)="crearBaseDeDatos()">Crear</button>
+  </div>
+</ng-template> -->
+
+
+
+

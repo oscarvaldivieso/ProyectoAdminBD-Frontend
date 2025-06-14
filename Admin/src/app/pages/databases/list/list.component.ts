@@ -37,23 +37,14 @@ export class ListComponent implements OnInit{
   openModal(template: TemplateRef<any>) {
     this.modalRef = this.modalService.show(template);
   }
-    // Price Slider
-    pricevalue: number = 100;
-    minValue = 500;
-    maxValue = 3800;
-    options: Options = {
-      floor: 0,
-      ceil: 5000,
-      translate: (value: number): string => {
-        return '$' + value;
-      },
-    };
+    
 
-    nuevoNombreBD: string = '';
+  nuevoNombreBD: string = '';
 
   http = inject(HttpClient);
 
   BasesDatos: string[] = []; //Arreglo que usaremos para traer lo del endpoint
+  
 
   ngOnInit(){
     this.listarBasesDeDatos();
@@ -74,40 +65,7 @@ export class ListComponent implements OnInit{
     });
   }
 
-  eliminarRestaurante(id: number) {
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: '¡No podrás revertir esto!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: 'gray',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const url = `https://localhost:7091/EliminarRestaurante?id=${id}`;
-        
-        this.http.post(url, null).subscribe({
-          next: () => {
-            Swal.fire(
-              'Eliminado',
-              'El restaurante ha sido eliminado correctamente.',
-              'success'
-            );
-            this.listarBasesDeDatos(); // <- recarga la lista si tienes una función así
-          },
-          error: () => {
-            Swal.fire(
-              'Error',
-              'Hubo un problema al eliminar el restaurante.',
-              'error'
-            );
-          }
-        });
-      }
-    });
-  }
+  
 
   showFilter() {
     const filterStyle = (document.getElementById("propertyFilters") as HTMLElement).style.display;
@@ -147,4 +105,6 @@ export class ListComponent implements OnInit{
       }
     });
   }
+
+  
 }

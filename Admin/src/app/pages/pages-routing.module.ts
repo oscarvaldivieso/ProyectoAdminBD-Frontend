@@ -70,6 +70,9 @@ const routes: Routes = [
   },
   {
     path: 'databases', loadChildren: () => import('./databases/databases.module').then(m => m.DatabasesModule)
+  },
+  {
+    path: 'tables', loadChildren: () => import('./tables/tables.module').then(m => m.TablesModule)
   }
 ];
 

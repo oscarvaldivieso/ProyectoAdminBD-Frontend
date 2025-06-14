@@ -16,6 +16,7 @@
     "APPS": {
       "TEXT": "Apps",
       "LIST": {
+        "TABLES": "Tablas",
         "HOME":"Inicio",
         "PAQUETES": "Paquetes",
         "PAQUETE": "Paquete",
