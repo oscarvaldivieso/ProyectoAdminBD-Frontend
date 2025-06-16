@@ -52,7 +52,7 @@
                   <button class="btn btn-outline-danger btn-sm" title="Eliminar tabla">
                     <i class="bi bi-trash"></i>
                   </button>
-                  <button class="btn btn-outline-warning btn-sm" title="Editar tabla">
+                  <button class="btn btn-outline-warning btn-sm" title="Editar tabla" (click)="openEditarTablaModal(modalEditarTabla, tabla)">
                     <i class="bi bi-pencil"></i>
                   </button>
                 </div>
@@ -154,6 +154,62 @@
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Cancelar</button>
       <button type="submit" class="btn btn-primary">Crear tabla</button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #modalEditarTabla>
+  <div class="modal-header">
+    <h5 class="modal-title">Editar tabla: {{ tablaAEditar?.tableName }}</h5>
+    <button type="button" class="btn-close" (click)="modalRef?.hide()"></button>
+  </div>
+  <form [formGroup]="editarTablaForm" (ngSubmit)="editarTabla(selectedBD)">
+    <div class="modal-body">
+      <div class="mb-3">
+        <label class="form-label">Nombre de la tabla</label>
+        <input type="text" class="form-control" formControlName="tableName" [readonly]="true">
+      </div>
+      <div formArrayName="alterations">
+        <label class="form-label">Alteraciones</label>
+        <div *ngFor="let alt of alterations.controls; let i = index" [formGroupName]="i" class="border rounded p-3 mb-2 bg-light">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">Operación</label>
+              <select class="form-select" formControlName="operation">
+                <option value="ALTER">ALTER</option>
+                <option value="DROP">DROP</option>
+                <option value="ADD">ADD</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Nombre columna</label>
+              <input type="text" class="form-control" formControlName="columnName" placeholder="Ej: Edad">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Tipo de dato</label>
+              <input type="text" class="form-control" formControlName="dataType" placeholder="Ej: INT, VARCHAR(MAX)">
+            </div>
+            <div class="col-md-2">
+              <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" formControlName="isNullable" id="editnull{{i}}">
+                <label class="form-check-label" for="editnull{{i}}">Nulo</label>
+              </div>
+            </div>
+            <div class="col-md-1 text-end">
+              <button type="button" class="btn btn-outline-danger btn-sm mt-4" (click)="removeAlteration(i)" [disabled]="alterations.length === 1">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="addAlteration()">
+          <i class="bi bi-plus"></i> Agregar alteración
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">Guardar cambios</button>
     </div>
   </form>
 </ng-template>

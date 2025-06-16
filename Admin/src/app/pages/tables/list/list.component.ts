@@ -30,8 +30,10 @@ export class ListComponent implements OnInit {
   TablasBD: string[] = [];
 
   crearTablaForm: FormGroup;
+  editarTablaForm: FormGroup;
   modalRef?: BsModalRef;
   selectedBD: string = '';
+  tablaAEditar: any = null;
 
   constructor(
     private fb: FormBuilder,
@@ -44,6 +46,17 @@ export class ListComponent implements OnInit {
           name: ['', Validators.required],
           dataType: ['', Validators.required],
           isPrimaryKey: [false],
+          isNullable: [false] // Asegura valor booleano por defecto
+        })
+      ])
+    });
+    this.editarTablaForm = this.fb.group({
+      tableName: ['', Validators.required],
+      alterations: this.fb.array([
+        this.fb.group({
+          operation: ['ALTER', Validators.required],
+          columnName: ['', Validators.required],
+          dataType: ['', Validators.required],
           isNullable: [false]
         })
       ])
@@ -54,18 +67,37 @@ export class ListComponent implements OnInit {
     return this.crearTablaForm.get('columns') as FormArray;
   }
 
+  get alterations() {
+    return this.editarTablaForm.get('alterations') as FormArray;
+  }
+
   addColumn() {
     this.columns.push(this.fb.group({
       name: ['', Validators.required],
       dataType: ['', Validators.required],
       isPrimaryKey: [false],
-      isNullable: [false]
+      isNullable: [false] // Asegura valor booleano por defecto
     }));
   }
 
   removeColumn(index: number) {
     if (this.columns.length > 1) {
       this.columns.removeAt(index);
+    }
+  }
+
+  addAlteration() {
+    this.alterations.push(this.fb.group({
+      operation: ['ALTER', Validators.required],
+      columnName: ['', Validators.required],
+      dataType: ['', Validators.required],
+      isNullable: [false]
+    }));
+  }
+
+  removeAlteration(index: number) {
+    if (this.alterations.length > 1) {
+      this.alterations.removeAt(index);
     }
   }
 
@@ -117,6 +149,7 @@ export class ListComponent implements OnInit {
       return;
     }
     const url = `https://localhost:7241/create-table/${encodeURIComponent(nombreBD)}`;
+    console.log('JSON enviado a create-table:', JSON.stringify(this.crearTablaForm.value, null, 2));
     this.http.post(url, this.crearTablaForm.value, { responseType: 'text' as 'json' }).subscribe({
       next: () => {
         Swal.fire('Éxito', 'Tabla creada correctamente.', 'success');
@@ -131,6 +164,42 @@ export class ListComponent implements OnInit {
         } else {
           Swal.fire('Error', 'No se pudo crear la tabla.', 'error');
           console.error('Error al crear la tabla:', error);
+        }
+      }
+    });
+  }
+
+  openEditarTablaModal(template: TemplateRef<any>, tabla: string) {
+    this.tablaAEditar = { tableName: tabla };
+    this.editarTablaForm.reset();
+    this.editarTablaForm.patchValue({ tableName: tabla });
+    // Deja solo una alteración por defecto
+    while (this.alterations.length > 1) {
+      this.alterations.removeAt(0);
+    }
+    this.modalRef = this.modalService.show(template);
+  }
+
+  editarTabla(nombreBD: string) {
+    if (this.editarTablaForm.invalid) {
+      this.editarTablaForm.markAllAsTouched();
+      return;
+    }
+    const url = `https://localhost:7241/alter-table/${encodeURIComponent(nombreBD)}`;
+    this.http.post(url, this.editarTablaForm.value, { responseType: 'text' as 'json' }).subscribe({
+      next: () => {
+        Swal.fire('Éxito', 'Tabla alterada correctamente.', 'success');
+        this.modalRef?.hide();
+        this.listarTablasDeBD(nombreBD);
+      },
+      error: (error) => {
+        if (error.status === 200) {
+          Swal.fire('Éxito', 'Tabla alterada correctamente.', 'success');
+          this.modalRef?.hide();
+          this.listarTablasDeBD(nombreBD);
+        } else {
+          Swal.fire('Error', 'No se pudo alterar la tabla.', 'error');
+          console.error('Error al alterar la tabla:', error);
         }
       }
     });
