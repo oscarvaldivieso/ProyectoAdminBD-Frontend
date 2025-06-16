@@ -49,8 +49,8 @@
                   <button class="btn btn-outline-secondary btn-sm" title="Ver más">
                     Ver más
                   </button>
-                  <button class="btn btn-outline-danger btn-sm" title="Eliminar tabla">
-                    <i class="bi bi-trash"></i>
+                  <button class="btn btn-outline-danger btn-sm" title="Eliminar tabla" (click)="eliminarTabla(selectedBD, tabla)">
+                    <i class="bi bi-trash"></i> Eliminar
                   </button>
                   <button class="btn btn-outline-warning btn-sm" title="Editar tabla" (click)="openEditarTablaModal(modalEditarTabla, tabla)">
                     <i class="bi bi-pencil"></i>

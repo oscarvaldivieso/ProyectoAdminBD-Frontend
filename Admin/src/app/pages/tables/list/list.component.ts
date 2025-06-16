@@ -210,6 +210,38 @@ export class ListComponent implements OnInit {
     });
   }
 
+  eliminarTabla(nombreBD: string, nombreTabla: string) {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Deseas eliminar la tabla "${nombreTabla}"? Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: 'gray',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const url = `https://localhost:7241/delete-table?databaseName=${encodeURIComponent(nombreBD)}&nombreTabla=${encodeURIComponent(nombreTabla)}`;
+        this.http.delete(url, { responseType: 'text' as 'json' }).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'La tabla ha sido eliminada correctamente.', 'success');
+            this.listarTablasDeBD(nombreBD);
+          },
+          error: (error) => {
+            if (error.status === 200) {
+              Swal.fire('Eliminado', 'La tabla ha sido eliminada correctamente.', 'success');
+              this.listarTablasDeBD(nombreBD);
+            } else {
+              Swal.fire('Error', 'No se pudo eliminar la tabla.', 'error');
+              console.error('Error al eliminar la tabla:', error);
+            }
+          }
+        });
+      }
+    });
+  }
+
   onSelectBD(nombre: string) {
     this.selectedBD = nombre;
     this.listarTablasDeBD(nombre);
