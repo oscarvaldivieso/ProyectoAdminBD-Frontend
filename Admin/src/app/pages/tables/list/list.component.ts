@@ -136,10 +136,15 @@ export class ListComponent implements OnInit {
 
   openCrearTablaModal(template: TemplateRef<any>) {
     this.crearTablaForm.reset();
-    // Al menos una columna por defecto
+    // Deja solo una columna por defecto
     while (this.columns.length > 1) {
       this.columns.removeAt(0);
     }
+    // Asegura que la columna por defecto tenga isNullable en false
+    this.columns.at(0).patchValue({
+      isNullable: false,
+      isPrimaryKey: false
+    });
     this.modalRef = this.modalService.show(template);
   }
 
@@ -208,5 +213,15 @@ export class ListComponent implements OnInit {
   onSelectBD(nombre: string) {
     this.selectedBD = nombre;
     this.listarTablasDeBD(nombre);
+  }
+
+  onPKChange(index: number) {
+    const col = this.columns.at(index);
+    if (col.get('isPrimaryKey')?.value) {
+      col.get('isNullable')?.setValue(false);
+      col.get('isNullable')?.disable();
+    } else {
+      col.get('isNullable')?.enable();
+    }
   }
 }
