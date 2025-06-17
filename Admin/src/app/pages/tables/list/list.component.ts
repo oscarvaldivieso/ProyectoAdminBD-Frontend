@@ -34,6 +34,17 @@ export class ListComponent implements OnInit {
   modalRef?: BsModalRef;
   selectedBD: string = '';
   tablaAEditar: any = null;
+  // Corrijo el nombre de la variable y agrego el método para el cambio de motor en el listado de tablas
+  motorTablasSeleccionado: string = 'sqlserver';
+  motoresTablas = [
+    { nombre: 'SQL Server', valor: 'sqlserver', imagen: 'assets/images/sqlserver.png' },
+    { nombre: 'MySQL', valor: 'mysql', imagen: 'assets/images/mysql.png' }
+  ];
+  motorBDSeleccionado: string = 'sqlserver'; // 0 para SQL Server, 1 para MySQL
+  motoresBD = [
+    { nombre: 'SQL Server', valor: 'sqlserver', imagen: 'assets/images/sqlserver.png' },
+    { nombre: 'MySQL', valor: 'mysql', imagen: 'assets/images/mysql.png' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -105,10 +116,11 @@ export class ListComponent implements OnInit {
     this.listarBasesDeDatos();
   }
 
-  listarBasesDeDatos(): void{
+  listarBasesDeDatos(motorParam?: string): void {
     const loader = document.getElementById('elmLoader');
-  
-    this.http.get<string[]>('https://localhost:7241/databases-list').subscribe({
+    const motor = motorParam || this.motorBDSeleccionado;
+    const url = `https://localhost:7241/databases-list?motor=${motor}`;
+    this.http.get<string[]>(url).subscribe({
       next: (data) => {
         loader?.classList.add('d-none');
         this.BasesDatos = data;
@@ -119,9 +131,29 @@ export class ListComponent implements OnInit {
     });
   }
 
+  // Conversión entre motor de bases de datos (0/1) y motor de tablas (sqlserver/mysql)
+  motorBDToTablas(motorBD: string): string {
+    return motorBD === '0' ? 'sqlserver' : 'mysql';
+  }
+
+  motorTablasToBD(motorTablas: string): string {
+    return motorTablas === 'sqlserver' ? '0' : '1';
+  }
+
+  onMotorBDChange() {
+    this.listarBasesDeDatos();
+    this.selectedBD = '';
+    this.TablasBD = [];
+    this.motorTablasSeleccionado = this.motorBDToTablas(this.motorBDSeleccionado); // Sincroniza motores
+  }
+
+  onMotorTablasChange() {
+    this.listarBasesDeDatos(this.motorTablasToBD(this.motorTablasSeleccionado));
+    this.selectedBD = '';
+  }
 
   listarTablasDeBD(nombreBD: string) {
-    const url = `https://localhost:7241/list-tables?databaseName=${encodeURIComponent(nombreBD)}`;
+    const url = `https://localhost:7241/list-tables?databaseName=${encodeURIComponent(nombreBD)}&motor=${this.motorTablasSeleccionado}`;
     this.http.get<string[]>(url).subscribe({
       next: (data) => {
         this.TablasBD = data;
@@ -145,6 +177,9 @@ export class ListComponent implements OnInit {
       isNullable: false,
       isPrimaryKey: false
     });
+    this.motorTablasSeleccionado = this.motorBDToTablas(this.motorBDSeleccionado);
+    this.listarBasesDeDatos(this.motorTablasToBD(this.motorTablasSeleccionado));
+    this.selectedBD = '';
     this.modalRef = this.modalService.show(template);
   }
 
@@ -153,7 +188,7 @@ export class ListComponent implements OnInit {
       this.crearTablaForm.markAllAsTouched();
       return;
     }
-    const url = `https://localhost:7241/create-table/${encodeURIComponent(nombreBD)}`;
+    const url = `https://localhost:7241/create-table/${encodeURIComponent(nombreBD)}?motor=${this.motorTablasSeleccionado}`;
     console.log('JSON enviado a create-table:', JSON.stringify(this.crearTablaForm.value, null, 2));
     this.http.post(url, this.crearTablaForm.value, { responseType: 'text' as 'json' }).subscribe({
       next: () => {

@@ -11,15 +11,29 @@
                 </div><!--end row-->
             </div>
         </div>
-
-        <div class="mb-3">
+        
+        <div class="row mb-4 align-items-start">
+          <div class="col-md-3">
+            <label for="motorSelectBD" class="form-label">Motor de base de datos</label>
+            <div class="input-group">
+              <select id="motorSelectBD" class="form-select" [(ngModel)]="motorBDSeleccionado" (change)="onMotorBDChange()">
+                <option *ngFor="let motor of motoresBD" [value]="motor.valor">
+                  {{ motor.nombre }}
+                </option>
+              </select>
+              <span class="input-group-text bg-white">
+                <img *ngFor="let motor of motoresBD" [src]="motor.imagen" alt="{{motor.nombre}}" width="28" height="28" [style.display]="motorBDSeleccionado === motor.valor ? 'inline' : 'none'" />
+              </span>
+            </div>
+          </div>
+          <div class="col-md-4">
             <label for="selectBD" class="form-label">Selecciona una base de datos</label>
             <select id="selectBD" class="form-select" (change)="onSelectBD($any($event.target).value)">
                 <option value="" disabled selected>-- Selecciona una base de datos --</option>
                 <option *ngFor="let db of BasesDatos" [value]="db">{{ db }}</option>
             </select>
+          </div>
         </div>
-
 
         
 
@@ -112,43 +126,65 @@
   </div>
   <form [formGroup]="crearTablaForm" (ngSubmit)="crearTabla(selectedBD)">
     <div class="modal-body">
+      <div class="mb-4">
+        <label for="motorSelectTabla" class="form-label">Motor de base de datos</label>
+        <div class="input-group" style="max-width: 350px;">
+          <select id="motorSelectTabla" class="form-select" [(ngModel)]="motorTablasSeleccionado" (change)="onMotorTablasChange()">
+            <option *ngFor="let motor of motoresTablas" [value]="motor.valor">
+              {{ motor.nombre }}
+            </option>
+          </select>
+          <span class="input-group-text bg-white">
+            <img *ngFor="let motor of motoresTablas" [src]="motor.imagen" alt="{{motor.nombre}}" width="28" height="28" [style.display]="motorTablasSeleccionado === motor.valor ? 'inline' : 'none'" />
+          </span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="selectBDModal" class="form-label">Base de datos</label>
+        <select id="selectBDModal" class="form-select" [(ngModel)]="selectedBD" name="selectedBD">
+          <option value="" disabled selected>-- Selecciona una base de datos --</option>
+          <option *ngFor="let db of BasesDatos" [value]="db">{{ db }}</option>
+        </select>
+      </div>
       <div class="mb-3">
         <label class="form-label">Nombre de la tabla</label>
         <input type="text" class="form-control" formControlName="tableName" placeholder="Ej: Establo">
         <div *ngIf="crearTablaForm.get('tableName')?.invalid && crearTablaForm.get('tableName')?.touched" class="text-danger small">El nombre es obligatorio</div>
       </div>
-      <div formArrayName="columns">
+      <div class="mb-4">
         <label class="form-label">Columnas</label>
-        <div *ngFor="let col of columns.controls; let i = index" [formGroupName]="i" class="border rounded p-3 mb-2 bg-light">
-          <div class="row g-2 align-items-end">
-            <div class="col-md-4">
-              <label class="form-label">Nombre</label>
-              <input type="text" class="form-control" formControlName="name" placeholder="Ej: Id">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Tipo de dato</label>
-              <input type="text" class="form-control" formControlName="dataType" placeholder="Ej: INT, VARCHAR(MAX)">
-            </div>
-            <div class="col-md-2">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" formControlName="isPrimaryKey" id="pk{{i}}" (change)="onPKChange(i)">
-                <label class="form-check-label" for="pk{{i}}">PK</label>
+        <div formArrayName="columns">
+          <div *ngFor="let col of columns.controls; let i = index" [formGroupName]="i" class="border rounded p-3 mb-2 bg-light">
+            <div class="row g-2 align-items-end">
+              <div class="col-md-4">
+                <label class="form-label">Nombre</label>
+                <input type="text" class="form-control" formControlName="name" placeholder="Ej: Id">
               </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" formControlName="isNullable" id="null{{i}}">
-                <label class="form-check-label" for="null{{i}}">Nulo</label>
+              <div class="col-md-4">
+                <label class="form-label">Tipo de dato</label>
+                <input type="text" class="form-control" formControlName="dataType" placeholder="Ej: INT, VARCHAR(MAX)">
               </div>
-            </div>
-            <div class="col-md-2 text-end">
-              <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeColumn(i)" [disabled]="columns.length === 1">
-                <i class="bi bi-x"></i>
-              </button>
+              <div class="col-md-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" formControlName="isPrimaryKey" id="pk{{i}}" (change)="onPKChange(i)">
+                  <label class="form-check-label" for="pk{{i}}">PK</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" formControlName="isNullable" id="null{{i}}">
+                  <label class="form-check-label" for="null{{i}}">Nulo</label>
+                </div>
+              </div>
+              <div class="col-md-2 text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm" (click)="removeColumn(i)" [disabled]="columns.length === 1">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
             </div>
           </div>
+          <button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="addColumn()">
+            <i class="bi bi-plus"></i> Agregar columna
+          </button>
         </div>
-        <button type="button" class="btn btn-outline-primary btn-sm mt-2" (click)="addColumn()">
-          <i class="bi bi-plus"></i> Agregar columna
-        </button>
       </div>
     </div>
     <div class="modal-footer">
