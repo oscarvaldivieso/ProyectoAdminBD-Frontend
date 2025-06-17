@@ -16,6 +16,20 @@
             </div>
         </div>
 
+        <div class="mb-4">
+          <label for="motorSelect" class="form-label">Motor de base de datos</label>
+          <div class="input-group" style="max-width: 350px;">
+            <select id="motorSelect" class="form-select" [(ngModel)]="motorSeleccionado" (change)="onMotorChange($any($event.target).value)">
+              <option *ngFor="let motor of motores" [value]="motor.valor">
+                {{ motor.nombre }}
+              </option>
+            </select>
+            <span class="input-group-text bg-white">
+              <img *ngFor="let motor of motores" [src]="motor.imagen" alt="{{motor.nombre}}" width="28" height="28" [style.display]="motorSeleccionado === motor.valor ? 'inline' : 'none'" />
+            </span>
+          </div>
+        </div>
+
         <div class="row" id="property-list">
             <div class="col-md-4 mb-3" *ngFor="let db of BasesDatos; let i = index">
                 <div class="card shadow-sm h-100">
@@ -79,6 +93,8 @@
   }
 </style>
 
+
+
 <ng-template #templateAgregarBD>
   <div class="modal-header">
     <h5 class="modal-title">Agregar Base de Datos</h5>
@@ -88,6 +104,19 @@
     <div class="mb-3">
       <label for="nombreBD" class="form-label">Nombre de la base de datos</label>
       <input type="text" class="form-control" id="nombreBD" [(ngModel)]="nuevoNombreBD" placeholder="Ingrese el nombre">
+    </div>
+    <div class="mb-4">
+      <label for="motorSelectModal" class="form-label">Motor de base de datos</label>
+      <div class="input-group" style="max-width: 350px;">
+        <select id="motorSelectModal" class="form-select" [(ngModel)]="motorSeleccionado">
+          <option *ngFor="let motor of motores" [value]="motor.valor">
+            {{ motor.nombre }}
+          </option>
+        </select>
+        <span class="input-group-text bg-white">
+          <img *ngFor="let motor of motores" [src]="motor.imagen" alt="{{motor.nombre}}" width="28" height="28" [style.display]="motorSeleccionado === motor.valor ? 'inline' : 'none'" />
+        </span>
+      </div>
     </div>
   </div>
   <div class="modal-footer">

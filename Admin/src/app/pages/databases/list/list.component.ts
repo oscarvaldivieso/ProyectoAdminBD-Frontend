@@ -44,7 +44,11 @@ export class ListComponent implements OnInit{
   http = inject(HttpClient);
 
   BasesDatos: string[] = []; //Arreglo que usaremos para traer lo del endpoint
-  
+  motorSeleccionado: string = '0'; // 0 para SQL Server, 1 para MySQL
+  motores = [
+    { nombre: 'SQL Server', valor: '0', imagen: 'assets/images/sqlserver.png' },
+    { nombre: 'MySQL', valor: '1', imagen: 'assets/images/mysql.png' }
+  ];
 
   ngOnInit(){
     this.listarBasesDeDatos();
@@ -53,8 +57,8 @@ export class ListComponent implements OnInit{
 
   listarBasesDeDatos(): void{
     const loader = document.getElementById('elmLoader');
-  
-    this.http.get<string[]>('https://localhost:7241/databases-list').subscribe({
+    const url = `https://localhost:7241/databases-list?motor=${this.motorSeleccionado}`;
+    this.http.get<string[]>(url).subscribe({
       next: (data) => {
         loader?.classList.add('d-none');
         this.BasesDatos = data;
@@ -65,8 +69,11 @@ export class ListComponent implements OnInit{
     });
   }
 
+  onMotorChange(valor: string) {
+    this.motorSeleccionado = valor;
+    this.listarBasesDeDatos();
+  }
   
-
   showFilter() {
     const filterStyle = (document.getElementById("propertyFilters") as HTMLElement).style.display;
     if (filterStyle == 'none') {
@@ -88,20 +95,24 @@ export class ListComponent implements OnInit{
       Swal.fire('Error', 'El nombre de la base de datos no puede estar vacío.', 'error');
       return;
     }
-    const url = `https://localhost:7241/${this.nuevoNombreBD}`;
+    const url = `https://localhost:7241/create?nombre=${encodeURIComponent(this.nuevoNombreBD)}&motor=${this.motorSeleccionado}`;
     this.http.post(url, {}, { responseType: 'text' as 'json' }).subscribe({
       next: () => {
         Swal.fire('Éxito', 'Base de datos creada correctamente.', 'success');
         this.nuevoNombreBD = '';
-        const modal = document.getElementById('modalAgregarBD');
-        if (modal) {
-          (window as any).bootstrap?.Modal.getOrCreateInstance(modal).hide();
-        }
+        this.modalRef?.hide();
         this.listarBasesDeDatos();
       },
       error: (error) => {
-        Swal.fire('Error', 'No se pudo crear la base de datos.', 'error');
-        console.error('Error al crear la base de datos:', error);
+        if (error.status === 200) {
+          Swal.fire('Éxito', 'Base de datos creada correctamente.', 'success');
+          this.nuevoNombreBD = '';
+          this.modalRef?.hide();
+          this.listarBasesDeDatos();
+        } else {
+          Swal.fire('Error', 'No se pudo crear la base de datos.', 'error');
+          console.error('Error al crear la base de datos:', error);
+        }
       }
     });
   }
