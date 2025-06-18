@@ -101,6 +101,7 @@ export class ListComponent implements OnInit {
     this.columns.push(this.fb.group({
       name: ['', Validators.required],
       dataType: ['', Validators.required],
+      length: [''], // <-- Asegura que cada columna nueva tenga el campo length
       isPrimaryKey: [false],
       isNullable: [false] // Asegura valor booleano por defecto
     }));
