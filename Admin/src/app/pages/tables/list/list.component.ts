@@ -303,20 +303,21 @@ export class ListComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        const url = `https://localhost:7241/delete-table?databaseName=${encodeURIComponent(nombreBD)}&nombreTabla=${encodeURIComponent(nombreTabla)}`;
-        this.http.delete(url, { responseType: 'text' as 'json' }).subscribe({
-          next: () => {
-            Swal.fire('Eliminado', 'La tabla ha sido eliminada correctamente.', 'success');
-            this.listarTablasDeBD(nombreBD);
+        const url = `https://localhost:7241/delete-table?databaseName=${encodeURIComponent(nombreBD)}&nombreTabla=${encodeURIComponent(nombreTabla)}&motor=${this.motorBDSeleccionado}`;
+        this.http.delete<{mensaje: string, error?: string}>(url).subscribe({
+          next: (resp) => {
+            if (resp.error) {
+              Swal.fire('Error', `${resp.mensaje}<br><small>${resp.error}</small>`, 'error');
+            } else {
+              Swal.fire('Eliminado', resp.mensaje || 'La tabla ha sido eliminada correctamente.', 'success');
+              this.listarTablasDeBD(nombreBD);
+            }
           },
           error: (error) => {
-            if (error.status === 200) {
-              Swal.fire('Eliminado', 'La tabla ha sido eliminada correctamente.', 'success');
-              this.listarTablasDeBD(nombreBD);
-            } else {
-              Swal.fire('Error', 'No se pudo eliminar la tabla.', 'error');
-              console.error('Error al eliminar la tabla:', error);
-            }
+            const msg = error?.error?.mensaje || 'No se pudo eliminar la tabla.';
+            const detail = error?.error?.error ? `<br><small>${error.error.error}</small>` : '';
+            Swal.fire('Error', msg + detail, 'error');
+            console.error('Error al eliminar la tabla:', error);
           }
         });
       }
