@@ -10,13 +10,18 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { HorizontalComponent } from './layouts/horizontal/horizontal.component';
 import { HorizontalTopbarComponent } from './layouts/horizontal-topbar/horizontal-topbar.component';
 import { WebsiteLayoutComponent } from './website/website-layout/website-layout.component';
+import { TableviewComponent } from './pages/tables/tableview/tableview.component';
 
 
 const routes: Routes = [
   { path: '', component: LayoutComponent, loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule), canActivate: [AuthGuard]  },
   { path: 'auth', component: AuthlayoutComponent, loadChildren: () => import('./account/account.module').then(m => m.AccountModule) },
   { path: 'pages',component: AuthlayoutComponent, loadChildren: () => import('./extraspages/extraspages.module').then(m => m.ExtraspagesModule)},
-  { path: 'website', loadChildren: () => import('./website/website.module').then(m => m.WebsiteModule) }
+  { path: 'website', loadChildren: () => import('./website/website.module').then(m => m.WebsiteModule) },
+  {
+    path: 'registros/:bd/:tabla/:motor',
+    component: TableviewComponent
+  }
 
 ];
 

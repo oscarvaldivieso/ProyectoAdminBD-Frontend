@@ -44,10 +44,10 @@ export class ListComponent implements OnInit{
   http = inject(HttpClient);
 
   BasesDatos: string[] = []; //Arreglo que usaremos para traer lo del endpoint
-  motorSeleccionado: string = 'sqlserver'; // 'sqlserver' para SQL Server, 'mysql' para MySQL
+  motorSeleccionado: string = '0'; // 0 para SQL Server, 1 para MySQL
   motores = [
-    { nombre: 'SQL Server', valor: 'sqlserver', imagen: 'assets/images/sqlserver.png' },
-    { nombre: 'MySQL', valor: 'mysql', imagen: 'assets/images/mysql.png' }
+    { nombre: 'SQL Server', valor: '0', imagen: 'assets/images/sqlserver.png' },
+    { nombre: 'MySQL', valor: '1', imagen: 'assets/images/mysql.png' }
   ];
 
   ngOnInit(){

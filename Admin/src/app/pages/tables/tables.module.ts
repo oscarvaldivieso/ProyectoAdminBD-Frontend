@@ -12,12 +12,14 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { ListComponent} from './list/list.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
+import { TableviewComponent } from './tableview/tableview.component';
 
 @NgModule({
   declarations: [
   ],
   imports: [
     ListComponent,
+    TableviewComponent,
     CommonModule,
     TablesRoutingModule,
     SharedModule,

@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common'; //Funciones de angular
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 
@@ -62,7 +62,8 @@ export class ListComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private modalService: BsModalService
+    private modalService: BsModalService,
+    private router: Router
   ) {
     this.crearTablaForm = this.fb.group({
       tableName: ['', Validators.required],
@@ -345,5 +346,10 @@ export class ListComponent implements OnInit {
   // Obtiene la longitud de un formGroup columna de forma robusta
   getColLength(col: any): any {
     return col.get('length')?.value || col.value.length || '';
+  }
+
+  verRegistrosTabla(nombreTabla: string) {
+    // Navega a la ruta de registros de la tabla seleccionada
+    this.router.navigate(['/tables/registros', this.selectedBD, nombreTabla, this.motorTablasSeleccionado]);
   }
 }
