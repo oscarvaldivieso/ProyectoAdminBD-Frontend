@@ -46,6 +46,10 @@
           <button class="btn btn-primary" (click)="openCrearTablaModal(modalCrearTabla)" [disabled]="!selectedBD">
             <i class="bi bi-plus-lg"></i> Crear tabla
           </button>
+          <!-- Botón creativo para crear relaciones -->
+          <button class="btn btn-outline-success ms-2 d-flex align-items-center gap-1" (click)="openCrearRelacionModal(modalCrearRelacion)" [disabled]="!selectedBD" title="Crear relación entre tablas">
+            <i class="bi bi-diagram-3"></i> Relacionar tablas
+          </button>
         </div>
           <div class="col-md-4 mb-4" *ngFor="let tabla of TablasBD; let i = index">
             <div class="card shadow border-0 h-100 animate__animated animate__fadeInUp" [style.animationDelay]="(i * 0.08)+'s'">
@@ -233,6 +237,49 @@
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Cancelar</button>
       <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #modalCrearRelacion>
+  <div class="modal-header">
+    <h5 class="modal-title">Crear relación entre tablas</h5>
+    <button type="button" class="btn-close" (click)="modalRef?.hide()"></button>
+  </div>
+  <form [formGroup]="crearRelacionForm" (ngSubmit)="crearRelacion()">
+    <div class="modal-body">
+      <div class="mb-3">
+        <label class="form-label">Tabla origen</label>
+        <select class="form-select" formControlName="tablaOrigen" (change)="onTablaOrigenChange()">
+          <option *ngFor="let tabla of TablasBD" [value]="tabla">{{ tabla }}</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Columna origen</label>
+        <select class="form-select" formControlName="columnaOrigen">
+          <option *ngFor="let col of columnasOrigen" [value]="col">{{ col }}</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tabla referencia</label>
+        <select class="form-select" formControlName="tablaReferencia" (change)="onTablaReferenciaChange()">
+          <option *ngFor="let tabla of TablasBD" [value]="tabla">{{ tabla }}</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Columna referencia</label>
+        <select class="form-select" formControlName="columnaReferencia">
+          <option *ngFor="let col of columnasReferencia" [value]="col">{{ col }}</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Nombre de la relación</label>
+        <input type="text" class="form-control" formControlName="nombreRelacion" placeholder="Ej: FK_Municipios_Departamentos_DepaCodigo">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="modalRef?.hide()">Cancelar</button>
+      <button type="submit" class="btn btn-success">Crear relación</button>
     </div>
   </form>
 </ng-template>

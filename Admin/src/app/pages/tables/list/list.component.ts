@@ -60,6 +60,10 @@ export class ListComponent implements OnInit {
     'DATETIME', 'TIMESTAMP', 'YEAR', 'JSON'
   ];
 
+  crearRelacionForm: FormGroup;
+  columnasOrigen: string[] = [];
+  columnasReferencia: string[] = [];
+
   constructor(
     private fb: FormBuilder,
     private modalService: BsModalService,
@@ -87,6 +91,13 @@ export class ListComponent implements OnInit {
           isNullable: [false]
         })
       ])
+    });
+    this.crearRelacionForm = this.fb.group({
+      tablaOrigen: ['', Validators.required],
+      columnaOrigen: ['', Validators.required],
+      tablaReferencia: ['', Validators.required],
+      columnaReferencia: ['', Validators.required],
+      nombreRelacion: ['', Validators.required]
     });
   }
 
@@ -351,5 +362,79 @@ export class ListComponent implements OnInit {
   verRegistrosTabla(nombreTabla: string) {
     // Navega a la ruta de registros de la tabla seleccionada
     this.router.navigate(['/tables/registros', this.selectedBD, nombreTabla, this.motorTablasSeleccionado]);
+  }
+
+  openCrearRelacionModal(template: TemplateRef<any>) {
+    this.crearRelacionForm.reset();
+    this.columnasOrigen = [];
+    this.columnasReferencia = [];
+    this.modalRef = this.modalService.show(template);
+  }
+
+  onTablaOrigenChange() {
+    const tabla = this.crearRelacionForm.get('tablaOrigen')?.value;
+    if (tabla && this.selectedBD) {
+      this.obtenerColumnas(tabla, 'origen');
+    } else {
+      this.columnasOrigen = [];
+    }
+  }
+
+  onTablaReferenciaChange() {
+    const tabla = this.crearRelacionForm.get('tablaReferencia')?.value;
+    if (tabla && this.selectedBD) {
+      this.obtenerColumnas(tabla, 'referencia');
+    } else {
+      this.columnasReferencia = [];
+    }
+  }
+
+  obtenerColumnas(tabla: string, tipo: 'origen' | 'referencia') {
+    const url = `https://localhost:7241/columns-list`;
+    const body = {
+      databaseName: this.selectedBD,
+      tableName: tabla, // Corrige el nombre de la propiedad
+      motor: Number(this.motorBDSeleccionado)
+    };
+    this.http.post<string[]>(url, body).subscribe({
+      next: (data) => {
+        if (tipo === 'origen') this.columnasOrigen = data;
+        else this.columnasReferencia = data;
+      },
+      error: (error) => {
+        Swal.fire('Error', 'No se pudieron obtener las columnas.', 'error');
+      }
+    });
+  }
+
+  crearRelacion() {
+    if (this.crearRelacionForm.invalid) {
+      this.crearRelacionForm.markAllAsTouched();
+      return;
+    }
+    const formValue = this.crearRelacionForm.value;
+    const body = {
+      databaseName: this.selectedBD,
+      tablaOrigen: formValue.tablaOrigen,
+      columnaOrigen: formValue.columnaOrigen,
+      tablaReferencia: formValue.tablaReferencia,
+      columnaReferencia: formValue.columnaReferencia,
+      nombreRelacion: formValue.nombreRelacion,
+      motor: Number(this.motorBDSeleccionado)
+    };
+    this.http.post('https://localhost:7241/relation-create', body, { responseType: 'text' as 'json' }).subscribe({
+      next: () => {
+        Swal.fire('Éxito', 'Relación creada correctamente.', 'success');
+        this.modalRef?.hide();
+      },
+      error: (error) => {
+        if (error.status === 200) {
+          Swal.fire('Éxito', 'Relación creada correctamente.', 'success');
+          this.modalRef?.hide();
+        } else {
+          Swal.fire('Error', 'No se pudo crear la relación.', 'error');
+        }
+      }
+    });
   }
 }
