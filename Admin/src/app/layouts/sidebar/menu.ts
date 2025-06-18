@@ -14,6 +14,12 @@ export const MENU: MenuItem[] = [
         icon: ' ph-table',
         link: '/tables/list'
         
+    },
+    {
+        id: 13,
+        label: 'MENUITEMS.APPS.LIST.QUERIES',
+        icon: ' ph-terminal',
+        link: '/queries/execute'
     }
     
 ]

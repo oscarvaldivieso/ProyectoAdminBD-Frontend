@@ -1,0 +1,67 @@
+<div class="container py-4">
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label for="motorSelect" class="form-label">Motor de base de datos</label>
+      <select id="motorSelect" class="form-select" [(ngModel)]="motorSeleccionado" (change)="onMotorChange()">
+        <option *ngFor="let motor of motoresBD" [value]="motor.valor">{{ motor.nombre }}</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label for="dbSelect" class="form-label">Base de datos</label>
+      <select id="dbSelect" class="form-select" [(ngModel)]="databaseSeleccionada">
+        <option value="" disabled selected>-- Selecciona una base de datos --</option>
+        <option *ngFor="let db of basesDatos" [value]="db">{{ db }}</option>
+      </select>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-12">
+      <label for="sqlEditor" class="form-label">Sentencia SQL</label>
+      <textarea id="sqlEditor" class="form-control font-monospace" rows="6" [(ngModel)]="sql" placeholder="Escribe tu consulta SQL aquí..."></textarea>
+    </div>
+  </div>
+  <div class="row mb-4">
+    <div class="col-12 d-flex justify-content-end">
+      <button class="btn btn-primary" (click)="ejecutarQuery()" [disabled]="!sql || !databaseSeleccionada">
+        <i class="bi bi-play"></i> Ejecutar
+      </button>
+    </div>
+  </div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+  <div *ngIf="resultados && resultados.length > 0" class="table-responsive">
+    <table class="table table-bordered table-hover">
+      <thead class="table-light">
+        <tr>
+          <th *ngFor="let col of columnas">{{ col }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of resultados">
+          <td *ngFor="let col of columnas">{{ row[col] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div *ngIf="resultados && resultados.length === 0 && !error" class="alert alert-info">
+    No se encontraron resultados.
+  </div>
+  <div *ngIf="mensaje && !resultados.length && !error" class="alert alert-success">
+    {{ mensaje }}<span *ngIf="filasAfectadas !== null"> (Filas afectadas: {{ filasAfectadas }})</span>
+  </div>
+</div>
+
+<style>
+  #sqlEditor {
+    font-size: 1.1rem;
+    min-height: 120px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.2s;
+  }
+  #sqlEditor:focus {
+    border-color: #0d6efd;
+    outline: none;
+    background: #fff;
+  }
+</style>

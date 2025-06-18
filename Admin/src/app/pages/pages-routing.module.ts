@@ -73,6 +73,9 @@ const routes: Routes = [
   },
   {
     path: 'tables', loadChildren: () => import('./tables/tables.module').then(m => m.TablesModule)
+  },
+  {
+    path: 'queries', loadChildren: () => import('./queries/queries.module').then(m => m.QueriesModule)
   }
 ];
 
