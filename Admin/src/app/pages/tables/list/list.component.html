@@ -124,28 +124,8 @@
     <h5 class="modal-title">Crear nueva tabla</h5>
     <button type="button" class="btn-close" (click)="modalRef?.hide()"></button>
   </div>
-  <form [formGroup]="crearTablaForm" (ngSubmit)="crearTabla(selectedBD)">
+  <form [formGroup]="crearTablaForm" (ngSubmit)="crearTabla()">
     <div class="modal-body">
-      <div class="mb-4">
-        <label for="motorSelectTabla" class="form-label">Motor de base de datos</label>
-        <div class="input-group" style="max-width: 350px;">
-          <select id="motorSelectTabla" class="form-select" [(ngModel)]="motorTablasSeleccionado" (change)="onMotorTablasChange()">
-            <option *ngFor="let motor of motoresTablas" [value]="motor.valor">
-              {{ motor.nombre }}
-            </option>
-          </select>
-          <span class="input-group-text bg-white">
-            <img *ngFor="let motor of motoresTablas" [src]="motor.imagen" alt="{{motor.nombre}}" width="28" height="28" [style.display]="motorTablasSeleccionado === motor.valor ? 'inline' : 'none'" />
-          </span>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label for="selectBDModal" class="form-label">Base de datos</label>
-        <select id="selectBDModal" class="form-select" [(ngModel)]="selectedBD" name="selectedBD">
-          <option value="" disabled selected>-- Selecciona una base de datos --</option>
-          <option *ngFor="let db of BasesDatos" [value]="db">{{ db }}</option>
-        </select>
-      </div>
       <div class="mb-3">
         <label class="form-label">Nombre de la tabla</label>
         <input type="text" class="form-control" formControlName="tableName" placeholder="Ej: Establo">
@@ -162,7 +142,14 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">Tipo de dato</label>
-                <input type="text" class="form-control" formControlName="dataType" placeholder="Ej: INT, VARCHAR(MAX)">
+                <div class="input-group">
+                  <select class="form-select" formControlName="dataType" (change)="col.patchValue({ length: '' })">
+                    <option *ngFor="let tipo of (motorTablasSeleccionado === 'sqlserver' ? tiposDatosSQLServer : tiposDatosMySQL)" [value]="tipo">{{ tipo }}</option>
+                  </select>
+                  <input *ngIf="requiereLongitud(col.get('dataType')?.value)"
+                         type="number" min="1" class="form-control" style="max-width: 90px;" placeholder="Longitud"
+                         formControlName="length">
+                </div>
               </div>
               <div class="col-md-2">
                 <div class="form-check">

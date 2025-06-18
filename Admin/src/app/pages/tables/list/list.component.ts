@@ -42,8 +42,22 @@ export class ListComponent implements OnInit {
   ];
   motorBDSeleccionado: string = 'sqlserver'; // 0 para SQL Server, 1 para MySQL
   motoresBD = [
-    { nombre: 'SQL Server', valor: 'sqlserver', imagen: 'assets/images/sqlserver.png' },
-    { nombre: 'MySQL', valor: 'mysql', imagen: 'assets/images/mysql.png' }
+    { nombre: 'SQL Server', valor: '0', imagen: 'assets/images/sqlserver.png' },
+    { nombre: 'MySQL', valor: '1', imagen: 'assets/images/mysql.png' }
+  ];
+
+  // Tipos de datos para SQL Server y MySQL
+  tiposDatosSQLServer: string[] = [
+    'INT', 'BIGINT', 'SMALLINT', 'TINYINT', 'BIT', 'DECIMAL', 'NUMERIC', 'MONEY', 'SMALLMONEY',
+    'FLOAT', 'REAL', 'DATE', 'TIME', 'DATETIME', 'DATETIME2', 'SMALLDATETIME', 'CHAR', 'NCHAR',
+    'VARCHAR', 'NVARCHAR', 'TEXT', 'NTEXT', 'BINARY', 'VARBINARY', 'IMAGE', 'UNIQUEIDENTIFIER',
+    'XML', 'GEOGRAPHY', 'GEOMETRY', 'HIERARCHYID'
+  ];
+  tiposDatosMySQL: string[] = [
+    'INT', 'INTEGER', 'TINYINT', 'SMALLINT', 'MEDIUMINT', 'BIGINT', 'DECIMAL', 'NUMERIC', 'FLOAT',
+    'DOUBLE', 'BIT', 'CHAR', 'VARCHAR', 'BINARY', 'VARBINARY', 'TINYBLOB', 'BLOB', 'MEDIUMBLOB',
+    'LONGBLOB', 'TINYTEXT', 'TEXT', 'MEDIUMTEXT', 'LONGTEXT', 'ENUM', 'SET', 'DATE', 'TIME',
+    'DATETIME', 'TIMESTAMP', 'YEAR', 'JSON'
   ];
 
   constructor(
@@ -56,6 +70,7 @@ export class ListComponent implements OnInit {
         this.fb.group({
           name: ['', Validators.required],
           dataType: ['', Validators.required],
+          length: [''], // <-- Agregado para binding reactivo
           isPrimaryKey: [false],
           isNullable: [false] // Asegura valor booleano por defecto
         })
@@ -148,8 +163,11 @@ export class ListComponent implements OnInit {
   }
 
   onMotorTablasChange() {
-    this.listarBasesDeDatos(this.motorTablasToBD(this.motorTablasSeleccionado));
+    this.BasesDatos = [];
     this.selectedBD = '';
+    setTimeout(() => {
+      this.listarBasesDeDatos(this.motorTablasToBD(this.motorTablasSeleccionado));
+    }, 0);
   }
 
   listarTablasDeBD(nombreBD: string) {
@@ -177,30 +195,45 @@ export class ListComponent implements OnInit {
       isNullable: false,
       isPrimaryKey: false
     });
-    this.motorTablasSeleccionado = this.motorBDToTablas(this.motorBDSeleccionado);
-    this.listarBasesDeDatos(this.motorTablasToBD(this.motorTablasSeleccionado));
-    this.selectedBD = '';
+    // selectedBD ya debe estar correctamente seteado desde el dropdown principal
     this.modalRef = this.modalService.show(template);
   }
 
-  crearTabla(nombreBD: string) {
+  crearTabla() {
     if (this.crearTablaForm.invalid) {
       this.crearTablaForm.markAllAsTouched();
       return;
     }
-    const url = `https://localhost:7241/create-table/${encodeURIComponent(nombreBD)}?motor=${this.motorTablasSeleccionado}`;
-    console.log('JSON enviado a create-table:', JSON.stringify(this.crearTablaForm.value, null, 2));
-    this.http.post(url, this.crearTablaForm.value, { responseType: 'text' as 'json' }).subscribe({
+    if (!this.selectedBD) {
+      Swal.fire('Error', 'Debes seleccionar una base de datos antes de crear la tabla.', 'error');
+      return;
+    }
+    // Siempre incluir todos los campos en cada columna
+    // Al enviar, concatena la longitud si corresponde
+    const formValue = JSON.parse(JSON.stringify(this.crearTablaForm.value));
+    formValue.columns = formValue.columns.map((col: any) => {
+      // Si el tipo requiere longitud y hay longitud, concatena
+      if (this.requiereLongitud(col.dataType) && col.length && !/\(.*\)/.test(col.dataType)) {
+        col.dataType = `${col.dataType}(${col.length})`;
+      }
+      if (col.isPrimaryKey === undefined) col.isPrimaryKey = false;
+      if (col.isNullable === undefined) col.isNullable = false;
+      delete col.length;
+      return col;
+    });
+    const url = `https://localhost:7241/create-table/${encodeURIComponent(this.selectedBD)}?motor=${this.motorTablasSeleccionado}`;
+    console.log('JSON enviado a create-table:', JSON.stringify(formValue, null, 2));
+    this.http.post(url, formValue, { responseType: 'text' as 'json' }).subscribe({
       next: () => {
         Swal.fire('Éxito', 'Tabla creada correctamente.', 'success');
         this.modalRef?.hide();
-        this.listarTablasDeBD(nombreBD);
+        this.listarTablasDeBD(this.selectedBD);
       },
       error: (error) => {
         if (error.status === 200) {
           Swal.fire('Éxito', 'Tabla creada correctamente.', 'success');
           this.modalRef?.hide();
-          this.listarTablasDeBD(nombreBD);
+          this.listarTablasDeBD(this.selectedBD);
         } else {
           Swal.fire('Error', 'No se pudo crear la tabla.', 'error');
           console.error('Error al crear la tabla:', error);
@@ -282,6 +315,11 @@ export class ListComponent implements OnInit {
     this.listarTablasDeBD(nombre);
   }
 
+  // Maneja el cambio de base de datos en el modal para asegurar que selectedBD tenga el valor correcto
+  onSelectBDModal(event: any) {
+    this.selectedBD = event.target.value;
+  }
+
   onPKChange(index: number) {
     const col = this.columns.at(index);
     if (col.get('isPrimaryKey')?.value) {
@@ -290,5 +328,21 @@ export class ListComponent implements OnInit {
     } else {
       col.get('isNullable')?.enable();
     }
+  }
+
+  // Devuelve true si el tipo de dato requiere longitud (ej: VARCHAR, NVARCHAR, CHAR, etc.)
+  requiereLongitud(tipo: string): boolean {
+    if (!tipo) return false;
+    const tiposConLongitud = [
+      'VARCHAR', 'NVARCHAR', 'CHAR', 'NCHAR', 'VARBINARY', 'BINARY',
+      'VARCHAR2', 'NVARCHAR2', 'TINYTEXT', 'TINYBLOB', 'VARBINARY', 'VARBINARY'
+    ];
+    // Solo requiere longitud si el tipo es exactamente alguno de la lista
+    return tiposConLongitud.includes(tipo.toUpperCase());
+  }
+
+  // Obtiene la longitud de un formGroup columna de forma robusta
+  getColLength(col: any): any {
+    return col.get('length')?.value || col.value.length || '';
   }
 }
