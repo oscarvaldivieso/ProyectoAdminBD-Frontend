@@ -67,20 +67,22 @@ export class TableviewComponent implements OnInit {
       motor: motorNum
     };
     console.log('Payload enviado al insertar:', body);
-    this.http.post('https://localhost:7241/insertar', body, { responseType: 'text' }).subscribe({
+    this.http.post<any>('https://localhost:7241/ejecutar-dml', body).subscribe({
       next: (res) => {
-        this.insertResult = 'Registro insertado correctamente';
+        const mensaje = res?.mensaje || 'Operación ejecutada correctamente';
+        this.insertResult = mensaje;
         Swal.fire({
           icon: 'success',
           title: '¡Éxito!',
-          text: 'Registro insertado correctamente',
+          text: mensaje,
           timer: 1800,
           showConfirmButton: false
         });
         this.cargarRegistros();
       },
       error: (err) => {
-        this.insertResult = 'Error al insertar: ' + (err.error || err.message);
+        const mensaje = err?.error?.mensaje || err?.message || 'Error al ejecutar la operación';
+        this.insertResult = 'Error: ' + mensaje;
         Swal.fire({
           icon: 'error',
           title: 'Error',
